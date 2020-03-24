@@ -1,13 +1,17 @@
 function Start-IcingaWindowsRESTApi()
 {
     param(
-        [int]$Port = 5668
+        [int]$Port              = 5668,
+        [string]$CertFile       = $null,
+        [string]$CertThumbprint = $null
     );
+
+    $RootFolder = $PSScriptRoot;
 
     # Our ScriptBlock for the code being executed inside the thread
     [ScriptBlock]$IcingaRestApiScript = {
         # Allow us to parse the framework global data to this thread
-        param($IcingaGlobals, $Port);
+        param($IcingaGlobals, $Port, $RootFolder, $CertFile, $CertThumbprint);
 
         # Import the framework library components and initialise it
         # as daemon
@@ -32,11 +36,32 @@ function Start-IcingaWindowsRESTApi()
             [hashtable]::Synchronized(@{})
         );
 
+        # Make the root folder of our rest daemon module available
+        # for every possible thread we require
+        $RestDaemon.Add(
+            'RootFolder', $RootFolder
+        );
+
+        $Certificate = Get-IcingaSSLCertForSocket -CertFile $CertFile -CertThumbprint $CertThumbprint;
+
+        if ($null -eq $Certificate) {
+            Write-IcingaErrorMessage -EventId 2000 -Message 'Failed to start REST-Api daemon, as no valid provided SSL and Icinga 2 Agent certificate was found';
+            return;
+        }
+
+        $Socket = New-IcingaTCPSocket -Port $Port -Start;
+
+        Import-Module (Join-Path -Path $RootFolder -ChildPath 'lib\client\Start-IcingaRESTClientCommunication.psm1');
+
         # Keep our code excuted as long as the PowerShell service is
         # being executed. This is required to ensure we will execute
         # the code frequently instead of only once
         while ($TRUE) {
+            $Connection = Open-IcingaTCPClientConnection `
+                -Client (New-IcingaTCPClient -Socket $Socket) `
+                -Certificate $Certificate;
 
+            Start-IcingaRESTClientCommunication -Connection $Connection -IcingaGlobals $IcingaGlobals;
         }
     }
 
@@ -47,6 +72,6 @@ function Start-IcingaWindowsRESTApi()
         -Name "Icinga_PowerShell_Module_REST_Api" `
         -ThreadPool $global:IcingaDaemonData.IcingaThreadPool.BackgroundPool `
         -ScriptBlock $IcingaRestApiScript `
-        -Arguments @( $global:IcingaDaemonData, $Port ) `
+        -Arguments @( $global:IcingaDaemonData, $Port, $RootFolder, $CertFile, $CertThumbprint ) `
         -Start;
 }
