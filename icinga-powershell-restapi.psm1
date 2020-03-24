@@ -7,7 +7,7 @@ function Start-IcingaWindowsRESTApi()
     # Our ScriptBlock for the code being executed inside the thread
     [ScriptBlock]$IcingaRestApiScript = {
         # Allow us to parse the framework global data to this thread
-        param($IcingaGlobals);
+        param($IcingaGlobals, $Port);
 
         # Import the framework library components and initialise it
         # as daemon
@@ -47,6 +47,6 @@ function Start-IcingaWindowsRESTApi()
         -Name "Icinga_PowerShell_Module_REST_Api" `
         -ThreadPool $global:IcingaDaemonData.IcingaThreadPool.BackgroundPool `
         -ScriptBlock $IcingaRestApiScript `
-        -Arguments @( $global:IcingaDaemonData, 6000 ) `
+        -Arguments @( $global:IcingaDaemonData, $Port ) `
         -Start;
 }
