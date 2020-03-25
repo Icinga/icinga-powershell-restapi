@@ -12,7 +12,7 @@ function Start-IcingaRESTClientCommunication()
 
         # Import the framework library components and initialise it
         # as daemon
-        Use-Icinga -LibOnly -Daemon;
+        Use-Icinga -Daemon;
 
         # Map our Icinga globals to a shorter variable
         $RestDaemon = $IcingaGlobals.BackgroundDaemon.IcingaPowerShellRestApi;
