@@ -7,6 +7,8 @@ function Start-IcingaWindowsRESTApi()
     );
 
     $RootFolder = $PSScriptRoot;
+    Import-Module (Join-Path -Path $RootFolder -ChildPath 'lib\events\Register-IcingaRESTAPIEventLog.psm1');
+    Register-IcingaRESTAPIEventLog;
 
     # Our ScriptBlock for the code being executed inside the thread
     [ScriptBlock]$IcingaRestApiScript = {
@@ -45,7 +47,7 @@ function Start-IcingaWindowsRESTApi()
         $Certificate = Get-IcingaSSLCertForSocket -CertFile $CertFile -CertThumbprint $CertThumbprint;
 
         if ($null -eq $Certificate) {
-            Write-IcingaErrorMessage -EventId 2000 -Message 'Failed to start REST-Api daemon, as no valid provided SSL and Icinga 2 Agent certificate was found';
+            Write-IcingaEventMessage -EventId 2000 -Namespace 'RESTApi';
             return;
         }
 
