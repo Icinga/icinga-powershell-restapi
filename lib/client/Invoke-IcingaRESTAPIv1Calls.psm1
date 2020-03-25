@@ -26,8 +26,6 @@ function Invoke-IcingaRESTAPIv1Calls()
         return;
     }
 
-    Write-IcingaDebugMessage -Message ([string]::Format('Loading command !'));
-
     [string]$Command = $RestDaemon.RegisteredEndpoints[$ModuleToLoad];
 
     Write-IcingaDebugMessage -Message ('Command to execute' + $Command);
@@ -38,13 +36,11 @@ function Invoke-IcingaRESTAPIv1Calls()
         return;
     }
 
-    Write-IcingaDebugMessage -Message ('Executing command' + $Command);
-
     [hashtable]$CommandArguments = @{
         '-Request'       = $Request;
         '-Connection'    = $Connection;
         '-IcingaGlobals' = $IcingaGlobals;
-    }
+    };
 
-    & $Command @CommandArguments | Out-Null;
+    Invoke-Command -ScriptBlock { &$Command @CommandArguments };
 }
