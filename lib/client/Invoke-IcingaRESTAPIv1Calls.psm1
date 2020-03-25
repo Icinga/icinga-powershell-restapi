@@ -25,7 +25,7 @@ function Invoke-IcingaRESTAPIv1Calls()
 
     [string]$Command = $RestDaemon.RegisteredEndpoints[$ModuleToLoad];
 
-    Write-IcingaDebugMessage -Message ('Command to execute' + $Command);
+    Write-IcingaDebugMessage -Message ('Executing REST-Module: ' + $Command);
 
     if ($null -eq (Get-Command $Command)) {
         # TDOO: Send message reponse to client for invalid message

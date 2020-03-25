@@ -51,7 +51,15 @@ function Start-IcingaWindowsRESTApi()
         );
 
         $RESTEndpoints = Invoke-IcingaNamespaceCmdlets -Command 'Register-IcingaRESTAPIEndpoint*';
-        Write-IcingaDebugMessage -Message ($RESTEndpoints | Out-String);
+        Write-IcingaDebugMessage -Message (
+            [string]::Format(
+                'Loading configuration for REST-Endpoints{0}{1}',
+                (New-IcingaNewLine),
+                ($RESTEndpoints | Out-String)
+            )
+        );
+
+        Write-IcingaDebugMessage -Message ($RestDaemon | Out-String);
 
         foreach ($entry in $RESTEndpoints.Values) {
             [bool]$Success = Add-IcingaHashtableItem -Hashtable $RestDaemon.RegisteredEndpoints `
