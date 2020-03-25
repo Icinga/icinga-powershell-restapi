@@ -22,8 +22,21 @@ function Start-IcingaRESTClientCommunication()
         # Now properly translate the entire rest message to a parseable hashtable
         $RESTRequest         = Read-IcingaRestMessage -RestMessage $RestMessage;
 
-        # TODO: Add dynamic REST-Endpoint registering and invocation of commands
-        #       for doing the intended work
+        switch (Get-IcingaRESTPathElement -Request $RESTRequest -Index 0) {
+            'v1' {
+                Invoke-IcingaRESTAPIv1Calls -Request $RESTRequest -Connection $Connection -IcingaGlobals $IcingaGlobals;
+                break;
+            };
+            default {
+                # Todo: Add client response for invalid request
+                Write-IcingaDebugMessage -Message ('Invalid API call - no version specified' + ($RESTRequest.RequestPath | Out-String));
+                Send-IcingaTCPClientMessage -Message (
+                    New-IcingaTCPClientRESTMessage `
+                        -HTTPResponse ($IcingaHTTPEnums.HTTPResponseType.'Not Found') `
+                        -ContentBody 'Invalid API call received. No version specified.'
+                ) -Stream $Connection.Stream;
+            };
+        }
 
         # Finally close the clients connection as we are done here and
         # ensure this thread will close by simply leaving the ScriptBlock
