@@ -6,9 +6,6 @@ function Invoke-IcingaRESTAPIv1Calls()
         $IcingaGlobals
     );
 
-    Write-IcingaDebugMessage -Message ($Request | Out-String);
-    Write-IcingaDebugMessage -Message ($Request.RequestPath | Out-String);
-
     [string]$ModuleToLoad = Get-IcingaRESTPathElement -Request $RESTRequest -Index 1;
 
     if ([string]::IsNullOrEmpty($ModuleToLoad)) {
