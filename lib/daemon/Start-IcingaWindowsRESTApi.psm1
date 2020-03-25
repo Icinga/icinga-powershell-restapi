@@ -71,14 +71,14 @@ function Start-IcingaWindowsRESTApi()
         foreach ($entry in $CommandAliases.Values) {
             foreach ($component in $entry.Keys) {
                 [bool]$Success = Add-IcingaHashtableItem -Hashtable $RestDaemon.CommandAliases `
-                                                     -Key $component `
-                                                     -Value $entry[$component];
+                                                         -Key $component `
+                                                         -Value $entry[$component];
             
                 if ($Success -eq $FALSE) {
                     Write-IcingaEventMessage `
                         -EventId 3001 `
                         -Namespace 'RESTApi' `
-                        -Objects ([string]::Format('Adding duplicated REST command aliases "{0}" for namespace "{1}', $entry[$component])), $component, $CommandAliases;
+                        -Objects ([string]::Format('Adding duplicated REST command aliases "{0}" for namespace "{1}', $entry[$component], $component)), $CommandAliases;
                 }
             }
         }
