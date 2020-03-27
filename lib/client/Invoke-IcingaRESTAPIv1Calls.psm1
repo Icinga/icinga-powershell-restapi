@@ -37,6 +37,7 @@ function Invoke-IcingaRESTAPIv1Calls()
         '-Request'       = $Request;
         '-Connection'    = $Connection;
         '-IcingaGlobals' = $IcingaGlobals;
+        '-ApiVersion'    = 'v1';
     };
 
     Invoke-Command -ScriptBlock { &$Command @CommandArguments };
