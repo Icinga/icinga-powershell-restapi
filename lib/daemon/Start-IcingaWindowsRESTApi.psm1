@@ -68,7 +68,7 @@ function Start-IcingaWindowsRESTApi()
             
             if ($Success -eq $FALSE) {
                 Write-IcingaEventMessage `
-                    -EventId 3000 `
+                    -EventId 2100 `
                     -Namespace 'RESTApi' `
                     -Objects ([string]::Format('Adding duplicated REST endpoint "{0}" with command "{1}', $entry.Alias, $entry.Command)), $RESTEndpoints;
             }
@@ -84,7 +84,7 @@ function Start-IcingaWindowsRESTApi()
             
                 if ($Success -eq $FALSE) {
                     Write-IcingaEventMessage `
-                        -EventId 3001 `
+                        -EventId 2101 `
                         -Namespace 'RESTApi' `
                         -Objects ([string]::Format('Adding duplicated REST command aliases "{0}" for namespace "{1}', $entry[$component], $component)), $CommandAliases;
                 }
