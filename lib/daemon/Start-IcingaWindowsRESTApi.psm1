@@ -44,6 +44,14 @@ function Start-IcingaWindowsRESTApi()
             [hashtable]::Synchronized(@{})
         );
 
+        # This will add another hashtable to our previous
+        # IcingaPowerShellRestApi hashtable to store actual
+        # command aliases for execution for the API
+        $RestDaemon.Add(
+            'ClientBlacklist',
+            [hashtable]::Synchronized(@{})
+        );
+
         # Make the root folder of our rest daemon module available
         # for every possible thread we require
         $RestDaemon.Add(
@@ -108,6 +116,12 @@ function Start-IcingaWindowsRESTApi()
             $Connection = Open-IcingaTCPClientConnection `
                 -Client (New-IcingaTCPClient -Socket $Socket) `
                 -Certificate $Certificate;
+
+            if (Test-IcingaRESTClientBlacklisted -Client $Connection.Client -ClientList $RestDaemon.ClientBlacklist) {
+                Write-IcingaDebugMessage -Message 'A remote client which is trying to connect was blacklisted' -Objects $Connection.Client.Client;
+                Close-IcingaTCPConnection -Client $Connection.Client;
+                continue;
+            }
 
             Start-IcingaRESTClientCommunication -Connection $Connection -IcingaGlobals $IcingaGlobals;
         }
