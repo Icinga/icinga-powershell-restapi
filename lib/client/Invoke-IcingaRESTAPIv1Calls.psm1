@@ -9,8 +9,15 @@ function Invoke-IcingaRESTAPIv1Calls()
     [string]$ModuleToLoad = Get-IcingaRESTPathElement -Request $RESTRequest -Index 1;
 
     if ([string]::IsNullOrEmpty($ModuleToLoad)) {
-        # TDOO: Send message reponse to client for invalid message
-        Write-IcingaDebugMessage -Message 'Module for execution was NULL';
+        Send-IcingaTCPClientMessage -Message (
+            New-IcingaTCPClientRESTMessage `
+                -HTTPResponse ($IcingaHTTPEnums.HTTPResponseType.Ok) `
+                -ContentBody @{
+                    'Commands' = @(
+                        $RestDaemon.RegisteredEndpoints.Keys
+                    )
+                }
+        ) -Stream $Connection.Stream;
         return;
     }
 
@@ -18,18 +25,24 @@ function Invoke-IcingaRESTAPIv1Calls()
     $RestDaemon = $IcingaGlobals.BackgroundDaemon.IcingaPowerShellRestApi;
 
     if ($RestDaemon.RegisteredEndpoints.ContainsKey($ModuleToLoad) -eq $FALSE) {
-        # TDOO: Send message reponse to client for invalid message
-        Write-IcingaDebugMessage -Message 'Module for execution not found';
+        Send-IcingaTCPClientMessage -Message (
+            New-IcingaTCPClientRESTMessage `
+                -HTTPResponse ($IcingaHTTPEnums.HTTPResponseType.'Not Found') `
+                -ContentBody 'There was no module found which is registered for this endpoint name.'
+        ) -Stream $Connection.Stream;
         return;
     }
 
     [string]$Command = $RestDaemon.RegisteredEndpoints[$ModuleToLoad];
 
-    Write-IcingaDebugMessage -Message ('Executing REST-Module: ' + $Command);
+    Write-IcingaDebugMessage -Message 'Executing REST-Module' -Objects $Command;
 
-    if ($null -eq (Get-Command $Command)) {
-        # TDOO: Send message reponse to client for invalid message
-        Write-IcingaDebugMessage -Message ('Unknown command for execution found' + $Command);
+    if ($null -eq (Get-Command $Command -ErrorAction SilentlyContinue)) {
+        Send-IcingaTCPClientMessage -Message (
+            New-IcingaTCPClientRESTMessage `
+                -HTTPResponse ($IcingaHTTPEnums.HTTPResponseType.'Internal Server Error') `
+                -ContentBody 'This API endpoint is registered, but the PowerShell Cmdlet this module is referencing too does not exist. Please check if the module was installed correctly and contact the developer if you require assistance to resolve this issue.'
+        ) -Stream $Connection.Stream;
         return;
     }
 
