@@ -13,7 +13,7 @@ function Invoke-IcingaRESTAPIv1Calls()
             New-IcingaTCPClientRESTMessage `
                 -HTTPResponse ($IcingaHTTPEnums.HTTPResponseType.Ok) `
                 -ContentBody @{
-                    'Commands' = @(
+                    'Endpoints' = @(
                         $RestDaemon.RegisteredEndpoints.Keys
                     )
                 }
