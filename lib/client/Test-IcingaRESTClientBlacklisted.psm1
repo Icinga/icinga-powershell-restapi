@@ -17,7 +17,7 @@ function Test-IcingaRESTClientBlacklisted()
                             -NullValue 0;
 
     # After 3 invalid attempts we will blacklist the client
-    if ($Value -gt 3) {
+    if ($Value -gt 6) {
         Write-IcingaDebugMessage -Message 'Client is blacklisted' -Objects $IpAddress, $Value, $Client.Client;
         return $TRUE;
     }
