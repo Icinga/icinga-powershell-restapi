@@ -3,7 +3,8 @@ function Start-IcingaWindowsRESTApi()
     param(
         [int]$Port              = 5668,
         [string]$CertFile       = $null,
-        [string]$CertThumbprint = $null
+        [string]$CertThumbprint = $null,
+        [bool]$RequireAuth      = $FALSE
     );
 
     $RootFolder = $PSScriptRoot;
@@ -11,7 +12,7 @@ function Start-IcingaWindowsRESTApi()
     # Our ScriptBlock for the code being executed inside the thread
     [ScriptBlock]$IcingaRestApiScript = {
         # Allow us to parse the framework global data to this thread
-        param($IcingaGlobals, $Port, $RootFolder, $CertFile, $CertThumbprint);
+        param($IcingaGlobals, $Port, $RootFolder, $CertFile, $CertThumbprint, $RequireAuth);
 
         # Import the framework library components and initialise it
         # as daemon
@@ -123,7 +124,7 @@ function Start-IcingaWindowsRESTApi()
                 continue;
             }
 
-            Start-IcingaRESTClientCommunication -Connection $Connection -IcingaGlobals $IcingaGlobals;
+            Start-IcingaRESTClientCommunication -Connection $Connection -IcingaGlobals $IcingaGlobals -RequireAuth $RequireAuth;
         }
     }
 
@@ -134,6 +135,6 @@ function Start-IcingaWindowsRESTApi()
         -Name "Icinga_PowerShell_Module_REST_Api" `
         -ThreadPool $global:IcingaDaemonData.IcingaThreadPool.BackgroundPool `
         -ScriptBlock $IcingaRestApiScript `
-        -Arguments @( $global:IcingaDaemonData, $Port, $RootFolder, $CertFile, $CertThumbprint ) `
+        -Arguments @( $global:IcingaDaemonData, $Port, $RootFolder, $CertFile, $CertThumbprint, $RequireAuth ) `
         -Start;
 }

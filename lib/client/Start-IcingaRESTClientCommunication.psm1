@@ -2,6 +2,7 @@ function Start-IcingaRESTClientCommunication()
 {
     param(
         [Hashtable]$Connection = @{},
+        [bool]$RequireAuth     = $FALSE,
         $IcingaGlobals         = $null
     );
 
@@ -20,7 +21,7 @@ function Start-IcingaRESTClientCommunication()
     # Our ScriptBlock for the code being executed inside the thread
     [ScriptBlock]$IcingaRestClientScript = {
         # Allow us to parse the framework global data to this thread
-        param($IcingaGlobals, $Connection);
+        param($IcingaGlobals, $Connection, $RequireAuth);
 
         # Import the framework library components and initialise it
         # as daemon
@@ -35,6 +36,41 @@ function Start-IcingaRESTClientCommunication()
         $RESTRequest         = Read-IcingaRestMessage -RestMessage $RestMessage -Connection $Connection;
 
         if ($null -ne $RESTRequest) {
+
+            # Check if we require to authenticate the user
+            if ($RequireAuth) {
+                # If no authentication header is provided we should show the prompt
+                if ([string]::IsNullOrEmpty($RESTRequest.Header.Authorization)) {
+                    # In case we do not send an authentication header increase the blacklist counter
+                    # to ensure we are not spammed and "attacked" by a client with useless requests
+                    Add-IcingaRESTClientBlacklistCount `
+                        -Client $Connection.Client `
+                        -ClientList $IcingaGlobals.BackgroundDaemon.IcingaPowerShellRestApi.ClientBlacklist;
+                    # Send the authentication prompt
+                    Send-IcingaWebAuthMessage -Connection $Connection;
+                    # Close the connection
+                    Close-IcingaTCPConnection -Client $Connection.Client;
+                    return;
+                }
+
+                $Credentials        = Convert-Base64ToCredentials -AuthString $RESTRequest.Header.Authorization;
+                [bool]$LoginSuccess = Test-IcingaRESTCredentials -UserName $Credentials.user -Password $Credentials.password -Domain $Credentials.domain;
+                $Credentials        = $null;
+    
+                # Handle login failures
+                if ($LoginSuccess -eq $FALSE) {
+                    # Failed attempts should increase the blacklist counter
+                    Add-IcingaRESTClientBlacklistCount `
+                        -Client $Connection.Client `
+                        -ClientList $IcingaGlobals.BackgroundDaemon.IcingaPowerShellRestApi.ClientBlacklist;
+                    # Re-send the authentication prompt
+                    Send-IcingaWebAuthMessage -Connection $Connection;
+                    # Close the connection
+                    Close-IcingaTCPConnection -Client $Connection.Client;
+                    return;
+                }
+            }
+
             # We should remove clients from the blacklist who are sending valid requests
             Remove-IcingaRESTClientBlacklist -Client $Connection.Client -ClientList $RestDaemon.ClientBlacklist;
             switch (Get-IcingaRESTPathElement -Request $RESTRequest -Index 0) {
@@ -66,6 +102,6 @@ function Start-IcingaRESTClientCommunication()
         -Name ([string]::Format("Icinga_PowerShell_Module_REST_Client_{0}", (Get-IcingaTCPClientRemoteEndpoint -Client $Connection.Client))) `
         -ThreadPool $IcingaGlobals.IcingaThreadPool.BackgroundPool `
         -ScriptBlock $IcingaRestClientScript `
-        -Arguments @( $IcingaGlobals, $Connection ) `
+        -Arguments @( $IcingaGlobals, $Connection, $RequireAuth ) `
         -Start;
 }

@@ -100,6 +100,7 @@ The REST-Api daemon will provide a bunch of arguments for configuring it
 | Port           | Integer | yes      | 5668    | The port the REST-Api will bind to |
 | CertFile       | String  | no       | null    | The full path to a server certificate located on the local disk (.pfx, .crt, .cert) |
 | CertThumbprint | String  | no       | null    | A thumbprint for a server certificate to use from the Windows Cert Store |
+| RequireAuth    | Bool    | no       | False    | Enables or disables basic auth for accessing the API. To login you will either have to use a local Windows account or a Domain account. Domain account usernames have to be provided as `domain\user` while trying to login |
 
 **Note:** `CertFile` and `CertThumbprint` are optional. By default the module will use the Icinga 2 Agent certificate which is located automatically. In case the Agent is not installed and/or certificates are not created yet, the daemon will not start.
 
@@ -118,6 +119,19 @@ To modify the arguments during startup of the daemon, you can provide them as ha
 Use-Icinga;
 Register-IcingaBackgroundDaemon -Command 'Start-IcingaWindowsRESTApi' -Arguments @{ '-Port' = 5669; '-CertFile' = 'path/to/your/cert/file' };
 ```
+
+## Enable Basic Auth
+
+To enable the basic auth for using the API you will have to set the `RequireAuth` argument to true while registering the daemon
+
+```powershell
+Use-Icinga;
+Register-IcingaBackgroundDaemon -Command 'Start-IcingaWindowsRESTApi' -Arguments @{ '-RequireAuth' = $TRUE };
+```
+
+Once activated users will have to authenticate with either a local Windows machine account or by using domain credentials. The username for using domain accounts have to follow the following syntax: `domain\user`.
+
+Please note that by using domain accounts your Windows host will require to be in the same domain or has access to the used domain for authentication.
 
 ## Restart the PowerShell Service
 
