@@ -12,6 +12,7 @@ Please take a look on the following content for installation and documentation:
 * [Installation Guide](doc/02-Installation.md)
 * [API documentation](doc/03-API-Documentation.md)
 * [Eventlog](doc/20-Eventlog.md)
+* [Changelog](doc/31-Changelog.md)
 
 ## Contributing
 
