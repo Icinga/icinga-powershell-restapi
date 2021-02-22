@@ -1,10 +1,11 @@
 function Start-IcingaWindowsRESTApi()
 {
-    param(
+    param (
         [int]$Port              = 5668,
         [string]$CertFile       = $null,
         [string]$CertThumbprint = $null,
-        [bool]$RequireAuth      = $FALSE
+        [bool]$RequireAuth      = $FALSE,
+        [int]$ConcurrentThreads = 5
     );
 
     $RootFolder = $PSScriptRoot;
@@ -12,7 +13,7 @@ function Start-IcingaWindowsRESTApi()
     # Our ScriptBlock for the code being executed inside the thread
     [ScriptBlock]$IcingaRestApiScript = {
         # Allow us to parse the framework global data to this thread
-        param($IcingaGlobals, $Port, $RootFolder, $CertFile, $CertThumbprint, $RequireAuth);
+        param($IcingaDaemonData, $Port, $RootFolder, $CertFile, $CertThumbprint, $RequireAuth);
 
         # Import the framework library components and initialise it
         # as daemon
@@ -21,13 +22,13 @@ function Start-IcingaWindowsRESTApi()
         # Add a synchronized hashtable to the global data background
         # daemon hashtable to write data to. In addition it will
         # allow to share data collected from this daemon with others
-        $IcingaGlobals.BackgroundDaemon.Add(
+        $IcingaDaemonData.BackgroundDaemon.Add(
             'IcingaPowerShellRestApi',
             [hashtable]::Synchronized(@{})
         );
 
         # Map our Icinga globals to a shorter variable
-        $RestDaemon = $IcingaGlobals.BackgroundDaemon.IcingaPowerShellRestApi;
+        $RestDaemon = $IcingaDaemonData.BackgroundDaemon.IcingaPowerShellRestApi;
 
         # This will add another hashtable to our previous
         # IcingaPowerShellRestApi hashtable to store actual
@@ -110,7 +111,7 @@ function Start-IcingaWindowsRESTApi()
 
         $Socket = New-IcingaTCPSocket -Port $Port -Start;
 
-        # Keep our code excuted as long as the PowerShell service is
+        # Keep our code executed as long as the PowerShell service is
         # being executed. This is required to ensure we will execute
         # the code frequently instead of only once
         while ($TRUE) {
@@ -124,17 +125,49 @@ function Start-IcingaWindowsRESTApi()
                 continue;
             }
 
-            Start-IcingaRESTClientCommunication -Connection $Connection -IcingaGlobals $IcingaGlobals -RequireAuth $RequireAuth;
+            if ((Test-IcingaRESTClientConnection -Connection $Connection) -eq $FALSE) {
+                return;
+            }
+
+            try {
+                $IcingaDaemonData.IcingaThreadContent.RESTApi.ApiRequests.Add(
+                    @{
+                        'ThreadId'   = (Get-IcingaNextRESTApiThreadId);
+                        'Connection' = $Connection;
+                    }
+                );
+            } catch {
+                $ExMsg = $_.Exception.Message;
+                Write-IcingaEventMessage -Namespace 'RESTApi' -EvenId 2050 -Objects $ExMsg;
+            }
         }
     }
+
+    [System.Collections.ArrayList]$ApiRequests = @();
+    $global:IcingaDaemonData.IcingaThreadContent.Add('RESTApi', ([hashtable]::Synchronized(@{})));
+    $global:IcingaDaemonData.IcingaThreadPool.Add('IcingaRESTApi', (New-IcingaThreadPool -MaxInstances ($ThreadId + 3)));
+    $global:IcingaDaemonData.IcingaThreadContent.RESTApi.Add('ApiRequests', $ApiRequests);
+    $global:IcingaDaemonData.IcingaThreadContent.RESTApi.Add('ApiCallThreadAssignment', ([hashtable]::Synchronized(@{})));
+    $global:IcingaDaemonData.IcingaThreadContent.RESTApi.Add('TotalThreads', $ConcurrentThreads);
+    $global:IcingaDaemonData.IcingaThreadContent.RESTApi.Add('LastThreadId', 0);
 
     # Now create a new thread for our ScriptBlock, assign a name and
     # parse all required arguments to it. Last but not least start it
     # directly
     New-IcingaThreadInstance `
-        -Name "Icinga_PowerShell_Module_REST_Api" `
-        -ThreadPool $global:IcingaDaemonData.IcingaThreadPool.BackgroundPool `
+        -Name "Icinga_for_Windows_REST_Api" `
+        -ThreadPool $global:IcingaDaemonData.IcingaThreadPool.IcingaRESTApi `
         -ScriptBlock $IcingaRestApiScript `
         -Arguments @( $global:IcingaDaemonData, $Port, $RootFolder, $CertFile, $CertThumbprint, $RequireAuth ) `
         -Start;
+
+    $ThreadId = 0;
+
+    while ($ConcurrentThreads -gt 0) {
+        $ConcurrentThreads = $ConcurrentThreads - 1;
+        Start-IcingaWindowsRESTThread -ThreadId $ThreadId -RequireAuth:$RequireAuth;
+        $ThreadId += 1;
+
+        Start-Sleep -Seconds 1;
+    }
 }

@@ -2,11 +2,12 @@ function Invoke-IcingaRESTAPIv1Calls()
 {
     param (
         [Hashtable]$Request = @{},
-        [Hashtable]$Connection = @{},
-        $IcingaGlobals
+        [Hashtable]$Connection = @{}
     );
 
     [string]$ModuleToLoad = Get-IcingaRESTPathElement -Request $RESTRequest -Index 1;
+    # Map our Icinga globals to a shorter variable
+    $RestDaemon           = $IcingaDaemonData.BackgroundDaemon.IcingaPowerShellRestApi;
 
     if ([string]::IsNullOrEmpty($ModuleToLoad)) {
         Send-IcingaTCPClientMessage -Message (
@@ -20,9 +21,6 @@ function Invoke-IcingaRESTAPIv1Calls()
         ) -Stream $Connection.Stream;
         return;
     }
-
-    # Map our Icinga globals to a shorter variable
-    $RestDaemon = $IcingaGlobals.BackgroundDaemon.IcingaPowerShellRestApi;
 
     if ($RestDaemon.RegisteredEndpoints.ContainsKey($ModuleToLoad) -eq $FALSE) {
         Send-IcingaTCPClientMessage -Message (
@@ -49,7 +47,7 @@ function Invoke-IcingaRESTAPIv1Calls()
     [hashtable]$CommandArguments = @{
         '-Request'       = $Request;
         '-Connection'    = $Connection;
-        '-IcingaGlobals' = $IcingaGlobals;
+        '-IcingaGlobals' = $IcingaDaemonData;
         '-ApiVersion'    = 'v1';
     };
 
