@@ -5,7 +5,8 @@ function Start-IcingaWindowsRESTApi()
         [string]$CertFile       = $null,
         [string]$CertThumbprint = $null,
         [bool]$RequireAuth      = $FALSE,
-        [int]$ConcurrentThreads = 5
+        [int]$ConcurrentThreads = 5,
+        [int]$Timeout           = 30
     );
 
     $RootFolder = $PSScriptRoot;
