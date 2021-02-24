@@ -11,6 +11,7 @@ Please take a look on the following content for installation and documentation:
 * [Introduction](doc/01-Introduction.md)
 * [Installation Guide](doc/02-Installation.md)
 * [API documentation](doc/03-API-Documentation.md)
+* [Whitelists and Blacklists for Commands](doc/04-Whitelist-and-Blacklists-for-Commands.md)
 * [Eventlog](doc/20-Eventlog.md)
 * [Changelog](doc/31-Changelog.md)
 

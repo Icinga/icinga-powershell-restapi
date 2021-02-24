@@ -14,6 +14,8 @@ Released closed milestones can be found on [GitHub](https://github.com/Icinga/ic
 ### Enhancements
 
 * [#1](https://github.com/Icinga/icinga-powershell-restapi/pull/1) Improves REST-Api performance by using static background threads for new calls which are queued inside them, instead of creating new threads and terminating them afterwards for each request
+* [#2](https://github.com/Icinga/icinga-powershell-restapi/pull/2) Adds support to blacklist or whitelist commands executed by Api endpoints
+
 
 ## 1.0.0 (2020-06-02)
 
