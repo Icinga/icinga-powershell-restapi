@@ -1,3 +1,45 @@
+<#
+.SYNOPSIS
+    A background daemon for Icinga for Windows, providing a REST-Api interface over secure
+    TLS (https) connections. As certificates either custom ones are used or by default the
+    Icinga Agent certificates
+.DESCRIPTION
+    This background daemon provides a REST-Api interface by default on Port 5668 over
+    TLS connections. No unencrypted http requests are allowed. As certificate it will
+    either use the default Icinga Agent certificates (default config) or custom generated
+    ones, specified as arguments while installing the daemon.
+
+    In addition you can enable authentication, which allows local users or domain users.
+
+    By default 5 concurrent threads will perform the work on API requests, can how ever be
+    reduced or increased depending on configuration.
+
+    More Information on
+    https://icinga.com/docs/icinga-for-windows/latest/restapi
+.PARAMETER Port
+    The Port the REST-Api will listen on. Defaults to 5668
+.PARAMETER CertFile
+    Use this to define a path on your local disk of you are using custom certificates.
+    Supported files are: .pfx, .crt
+
+    By default, the local Icinga Agent certificates are used
+.PARAMETER CertThumbprint
+    Provide a thumbprint of a certificate stored within the local Windows Cert store
+
+    By default, the local Icinga Agent certificates are used
+.PARAMETER RequireAuth
+    Enable authentication which will add basic auth prompt for any request on the API.
+    For authentication you can either use local Windows accounts or domain accounts
+.PARAMETER ConcurrentThreads
+    Defines on how many threads are started to process API requests. Defaults to 5
+.PARAMETER Timeout
+    Not for use on this module directly, but allows other modules and features to properly
+    get an idea after which time interval connections are terminated
+.LINK
+    https://github.com/Icinga/icinga-powershell-restapi
+.NOTES
+#>
+
 function Start-IcingaWindowsRESTApi()
 {
     param (
