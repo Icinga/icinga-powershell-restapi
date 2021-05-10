@@ -17,6 +17,7 @@ Released closed milestones can be found on [GitHub](https://github.com/Icinga/ic
 
 ## Bugfixes
 
+* [#3](https://github.com/Icinga/icinga-powershell-restapi/issues/3) Fixes threading queueing issue for incoming API requests
 * [#5](https://github.com/Icinga/icinga-powershell-restapi/pull/5) Fixes memory leak on REST-Api and now forces error and memory cleanup
 
 ## 1.1.0 (2021-03-02)
