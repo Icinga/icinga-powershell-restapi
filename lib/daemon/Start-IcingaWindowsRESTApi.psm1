@@ -179,12 +179,14 @@ function Start-IcingaWindowsRESTApi()
             }
 
             try {
-                $IcingaDaemonData.IcingaThreadContent.RESTApi.ApiRequests.Add(
-                    @{
-                        'ThreadId'   = (Get-IcingaNextRESTApiThreadId);
-                        'Connection' = $Connection;
-                    }
-                );
+                $NextRESTApiThreadId = (Get-IcingaNextRESTApiThreadId);
+
+                if ($IcingaDaemonData.IcingaThreadContent.RESTApi.ApiRequests.ContainsKey($NextRESTApiThreadId) -eq $FALSE) {
+                    Close-IcingaTCPConnection -Client $Connection.Client;
+                    continue;
+                }
+
+                $IcingaDaemonData.IcingaThreadContent.RESTApi.ApiRequests.$NextRESTApiThreadId.Enqueue($Connection);
             } catch {
                 $ExMsg = $_.Exception.Message;
                 Write-IcingaEventMessage -Namespace 'RESTApi' -EvenId 2050 -Objects $ExMsg;
@@ -197,10 +199,9 @@ function Start-IcingaWindowsRESTApi()
         }
     }
 
-    [System.Collections.ArrayList]$ApiRequests = @();
     $global:IcingaDaemonData.IcingaThreadContent.Add('RESTApi', ([hashtable]::Synchronized(@{})));
     $global:IcingaDaemonData.IcingaThreadPool.Add('IcingaRESTApi', (New-IcingaThreadPool -MaxInstances ($ThreadId + 3)));
-    $global:IcingaDaemonData.IcingaThreadContent.RESTApi.Add('ApiRequests', $ApiRequests);
+    $global:IcingaDaemonData.IcingaThreadContent.RESTApi.Add('ApiRequests', ([hashtable]::Synchronized(@{})));
     $global:IcingaDaemonData.IcingaThreadContent.RESTApi.Add('ApiCallThreadAssignment', ([hashtable]::Synchronized(@{})));
     $global:IcingaDaemonData.IcingaThreadContent.RESTApi.Add('TotalThreads', $ConcurrentThreads);
     $global:IcingaDaemonData.IcingaThreadContent.RESTApi.Add('LastThreadId', 0);
@@ -219,6 +220,8 @@ function Start-IcingaWindowsRESTApi()
 
     while ($ConcurrentThreads -gt 0) {
         $ConcurrentThreads = $ConcurrentThreads - 1;
+        [System.Collections.Queue]$RESTThreadQueue = @();
+        $global:IcingaDaemonData.IcingaThreadContent.RESTApi.ApiRequests.Add($ThreadId, [System.Collections.Queue]::Synchronized($RESTThreadQueue));
         Start-IcingaWindowsRESTThread -ThreadId $ThreadId -RequireAuth:$RequireAuth;
         $ThreadId += 1;
 

@@ -20,20 +20,22 @@ function Start-IcingaWindowsRESTThread()
         while ($TRUE) {
 
             try {
-                if ($IcingaDaemonData.IcingaThreadContent.RESTApi.ApiRequests.Count -eq 0) {
+                if ($IcingaDaemonData.IcingaThreadContent.RESTApi.ApiRequests.ContainsKey($ThreadId) -eq $FALSE) {
                     Start-Sleep -Milliseconds 10;
                     continue;
                 }
 
-                $ApiCallObject = Pop-IcingaArrayListItem -Array $IcingaDaemonData.IcingaThreadContent.RESTApi.ApiRequests;
-
-                if ($ApiCallObject.ThreadId -ne $ThreadId) {
-                    Add-IcingaArrayListItem -Array $IcingaDaemonData.IcingaThreadContent.RESTApi.ApiRequests -Element $ApiCallObject;
-                    Start-Sleep -Milliseconds 100;
+                if ($IcingaDaemonData.IcingaThreadContent.RESTApi.ApiRequests.$ThreadId.Count -eq 0) {
+                    Start-Sleep -Milliseconds 10;
                     continue;
                 }
+    
+                $Connection = $IcingaDaemonData.IcingaThreadContent.RESTApi.ApiRequests.$ThreadId.Dequeue();
 
-                $Connection = $ApiCallObject.Connection;
+                if ($null -eq $Connection) {
+                    Start-Sleep -Milliseconds 10;
+                    continue;
+                }
 
                 # Read the received message from the stream by using our smart functions
                 [string]$RestMessage = Read-IcingaTCPStream -Client $Connection.Client -Stream $Connection.Stream;
