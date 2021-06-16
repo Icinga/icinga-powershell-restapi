@@ -11,6 +11,7 @@ function Remove-IcingaRESTClientBlacklist()
 
     [string]$Endpoint  = Get-IcingaTCPClientRemoteEndpoint -Client $Client;
     [string]$IpAddress = $Endpoint.Split(':')[0];
+
     Remove-IcingaHashtableItem `
         -Hashtable $ClientList `
         -Key $IpAddress;
