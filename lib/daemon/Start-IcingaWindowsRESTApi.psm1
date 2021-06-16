@@ -169,7 +169,13 @@ function Start-IcingaWindowsRESTApi()
             }
 
             if ((Test-IcingaRESTClientConnection -Connection $Connection) -eq $FALSE) {
-                return;
+                continue;
+            }
+
+            # API not yet ready
+            if ($IcingaDaemonData.IcingaThreadContent.RESTApi.ApiRequests.Count -eq 0) {
+                Close-IcingaTCPConnection -Client $Connection.Client;
+                continue;
             }
 
             try {
@@ -183,6 +189,11 @@ function Start-IcingaWindowsRESTApi()
                 $ExMsg = $_.Exception.Message;
                 Write-IcingaEventMessage -Namespace 'RESTApi' -EvenId 2050 -Objects $ExMsg;
             }
+
+            # Cleanup the error stack and remove not required data
+            $Error.Clear();
+            # Force PowerShell to call the garbage collector to free memory
+            [System.GC]::Collect();
         }
     }
 
