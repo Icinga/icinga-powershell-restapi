@@ -20,5 +20,5 @@ function Add-IcingaRESTClientBlacklistCount()
         -Hashtable $ClientList `
         -Key $IpAddress `
         -Value ($Value + 1) `
-        -Override;
+        -Override | Out-Null;
 }

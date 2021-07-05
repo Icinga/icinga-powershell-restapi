@@ -51,5 +51,5 @@ function Invoke-IcingaRESTAPIv1Calls()
         '-ApiVersion'    = 'v1';
     };
 
-    Invoke-Command -ScriptBlock { &$Command @CommandArguments };
+    Invoke-Command -ScriptBlock { &$Command @CommandArguments } | Out-Null;
 }

@@ -14,6 +14,18 @@ function Register-IcingaEventLogMessagesRESTApi()
                 'Details'   = 'An API call send to the daemon could not be processed and caused an exception. Further details about the cause of this error can be found belowed.';
                 'EventId'   = 2050;
             };
+            2051 = @{
+                'EntryType' = 'Error';
+                'Message'   = 'Failed to execute API call';
+                'Details'   = 'An API call could not be processed due to an internal exception.';
+                'EventId'   = 2051;
+            };
+            2052 = @{
+                'EntryType' = 'Error';
+                'Message'   = 'Internal exception on calling API command';
+                'Details'   = 'An internal command assigned to an API request could not be executed and caused an exception.';
+                'EventId'   = 2052;
+            };
             2100 = @{
                 'EntryType' = 'Warning';
                 'Message'   = 'Failed to add namespace configuration for executed commands, as previous commands are reporting identical namespace identifiers';
