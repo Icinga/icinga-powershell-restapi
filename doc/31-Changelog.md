@@ -11,6 +11,10 @@ Released closed milestones can be found on [GitHub](https://github.com/Icinga/ic
 
 [Issue and PRs](https://github.com/Icinga/icinga-powershell-restapi/milestone/2?closed=1)
 
+### Enhancements
+
+* [#7](https://github.com/Icinga/icinga-powershell-restapi/pull/7) Adds support to set custom listen address
+
 ## 1.1.1 (2021-07-07)
 
 [Issue and PRs](https://github.com/Icinga/icinga-powershell-restapi/milestone/3?closed=1)
