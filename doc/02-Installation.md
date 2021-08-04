@@ -97,6 +97,7 @@ The REST-Api daemon will provide a bunch of arguments for configuring it
 
 | Argument       | Type    | Required | Default | Description |
 | ---            | ---     | ---      | ---     | ---         |
+| Address        | String  | no       | ''      | Allows to specify on which Address a socket should be created on. Defaults to `loopback` if empty
 | Port           | Integer | yes      | 5668    | The port the REST-Api will bind to |
 | CertFile       | String  | no       | null    | The full path to a server certificate located on the local disk (.pfx, .crt, .cert) |
 | CertThumbprint | String  | no       | null    | A thumbprint for a server certificate to use from the Windows Cert Store |

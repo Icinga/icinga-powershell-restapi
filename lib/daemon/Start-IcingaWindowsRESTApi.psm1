@@ -16,6 +16,8 @@
 
     More Information on
     https://icinga.com/docs/icinga-for-windows/latest/restapi
+.PARAMETER Address
+    Allows to specify on which Address a socket should be created on. Defaults to loopback if empty
 .PARAMETER Port
     The Port the REST-Api will listen on. Defaults to 5668
 .PARAMETER CertFile
@@ -43,6 +45,7 @@
 function Start-IcingaWindowsRESTApi()
 {
     param (
+        [string]$Address        = '',
         [int]$Port              = 5668,
         [string]$CertFile       = $null,
         [string]$CertThumbprint = $null,
@@ -152,7 +155,7 @@ function Start-IcingaWindowsRESTApi()
             return;
         }
 
-        $Socket = New-IcingaTCPSocket -Port $Port -Start;
+        $Socket = New-IcingaTCPSocket -Address $Address -Port $Port -Start;
 
         # Keep our code executed as long as the PowerShell service is
         # being executed. This is required to ensure we will execute
