@@ -1,11 +1,11 @@
 function Invoke-IcingaRESTAPIv1Calls()
 {
     param (
-        [Hashtable]$Request = @{},
+        [Hashtable]$Request    = @{},
         [Hashtable]$Connection = @{}
     );
 
-    [string]$ModuleToLoad = Get-IcingaRESTPathElement -Request $RESTRequest -Index 1;
+    [string]$ModuleToLoad = Get-IcingaRESTPathElement -Request $Request -Index 1;
     # Map our Icinga globals to a shorter variable
     $RestDaemon           = $IcingaDaemonData.BackgroundDaemon.IcingaPowerShellRestApi;
 
@@ -51,5 +51,5 @@ function Invoke-IcingaRESTAPIv1Calls()
         '-ApiVersion'    = 'v1';
     };
 
-    Invoke-Command -ScriptBlock { &$Command @CommandArguments } | Out-Null;
+    & $Command @CommandArguments | Out-Null;
 }

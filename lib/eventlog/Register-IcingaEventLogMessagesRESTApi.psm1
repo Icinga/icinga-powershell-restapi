@@ -8,10 +8,16 @@ function Register-IcingaEventLogMessagesRESTApi()
                 'Details'   = 'While starting the Icinga for Windows REST-Api daemon, no valid certificate was found for usage. You can either share a valid certificate by defining the full path with `-CertFile` to a .crt, .cert or .pfx file, by using `-CertThumbprint` to lookup a certificate inside the Microsoft cert store and by default the Icinga 2 Agent certificates. Please note that only Icinga 2 Agent version 2.8.0 or later are supported';
                 'EventId'   = 2000;
             };
+            2001 = @{
+                'EntryType' = 'Error';
+                'Message'   = 'Failed to start REST-Api daemon in JEA context';
+                'Details'   = 'Icinga for Windows is being used inside a JEA context as service with the REST-Api daemon. To establish a secure TLS socket, it is required to create certificates in advance for the socket to bind on with "Install-IcingaForWindowsCertificate". The REST-Api daemon will now exit.';
+                'EventId'   = 2001;
+            };
             2050 = @{
                 'EntryType' = 'Error';
                 'Message'   = 'Failed to parse received REST-Api call';
-                'Details'   = 'An API call send to the daemon could not be processed and caused an exception. Further details about the cause of this error can be found belowed.';
+                'Details'   = 'An API call send to the daemon could not be processed and caused an exception. Further details about the cause of this error can be found below.';
                 'EventId'   = 2050;
             };
             2051 = @{
