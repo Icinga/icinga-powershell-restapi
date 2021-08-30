@@ -20,7 +20,7 @@ There might be various side effects by doing so.
 
 ### PowerShell Gallery
 
-One of the simplier ways is to use PowerShell Gallery for the installation. For this we simply run the command
+One of the simpler ways is to use PowerShell Gallery for the installation. For this we simply run the command
 
 ```powershell
 Install-Module 'icinga-powershell-restapi';
@@ -105,6 +105,10 @@ The REST-Api daemon will provide a bunch of arguments for configuring it
 
 **Note:** `CertFile` and `CertThumbprint` are optional. By default the module will use the Icinga 2 Agent certificate which is located automatically. In case the Agent is not installed and/or certificates are not created yet, the daemon will not start.
 
+### Important Notice
+
+If you are running Icinga for Windows v1.6.0 or later and use the JEA profile, you will have to use `Install-IcingaForWindowsCertificate` to either install the Icinga Agent certificate as API certificate or a custom one. Your REST-Api certificate configuration is then ignored. This command provides the arguments `CertFile` and `CertThumbprint` with the same behavior as the REST daemon, but will always enforce the local installed certificate over your REST daemon configuration.
+
 ### Registration
 
 To register the REST-Api as background daemon, you can use the PowerShell Frameworks integrated Cmdlet
@@ -139,7 +143,7 @@ Please note that by using domain accounts your Windows host will require to be i
 Once installed, we are ready to go and can simply restart our Icinga PowerShell daemon.
 
 ```powershell
-Restart-Service icingapowershell;
+Restart-IcingaWindowsService;
 ```
 
 Afterwards our API should start just fine and be reachable on the provided port.
