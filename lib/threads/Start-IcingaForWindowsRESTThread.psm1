@@ -9,7 +9,7 @@ function Start-IcingaForWindowsRESTThread()
     # Last but not least start it directly
     New-IcingaThreadInstance `
         -Name ([string]::Format("Icinga_Windows_REST_Api_Thread_{0}", $ThreadId)) `
-        -ThreadPool $IcingaDaemonData.IcingaThreadPool.BackgroundPool `
+        -ThreadPool (New-IcingaThreadPool -MaxInstances 1) `
         -Command 'New-IcingaForWindowsRESTThread' `
         -CmdParameters @{
             'IcingaDaemonData' = $global:IcingaDaemonData;
