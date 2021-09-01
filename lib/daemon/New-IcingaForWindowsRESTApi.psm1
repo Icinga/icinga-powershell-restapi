@@ -100,13 +100,14 @@ function New-IcingaForWindowsRESTApi()
 
     Write-IcingaDebugMessage -Message ($RestDaemon.RegisteredEndpoints | Out-String);
 
-    if ($global:IcingaDaemonData.ContainsKey('SSLCertificate') -And $null -ne $global:IcingaDaemonData.SSLCertificate) {
-        $Certificate = $global:IcingaDaemonData.SSLCertificate;
-    } else {
-        if ($Global:IcingaDaemonData.JEAContext) {
+    if ($Global:IcingaDaemonData.JEAContext) {
+        if ($global:IcingaDaemonData.ContainsKey('SSLCertificate') -eq $FALSE -Or $null -eq $global:IcingaDaemonData.SSLCertificate) {
             Write-IcingaEventMessage -EventId 2001 -Namespace 'RESTApi';
             return;
         }
+
+        $Certificate = $global:IcingaDaemonData.SSLCertificate;
+    } else {
         $Certificate = Get-IcingaSSLCertForSocket -CertFile $CertFile -CertThumbprint $CertThumbprint;
     }
 
