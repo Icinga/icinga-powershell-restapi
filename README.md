@@ -1,3 +1,13 @@
+# Deprecation Notice
+
+This repository is deprecated and no longer required, as starting with Icinga for Windows v1.7.0 the REST-Api is a core module of the [icinga-powershell-framework](https://github.com/Icinga/icinga-powershell-framework) and natively included.
+
+If you have Icinga for Windows v1.7.0 or later installed, you can uninstall the component by using
+
+```powershell
+Uninstall-IcingaComponent -Name 'restapi'
+```
+
 # Icinga PowerShell RESTApi
 
 This repository provides a REST-Api module for the [Icinga PowerShell Framework](https://icinga.com/docs/windows). In combination with other PowerShell Modules you can register endpoints to fetch information, to execute checks or trigger additional actions.
